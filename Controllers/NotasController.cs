@@ -1,17 +1,25 @@
-// Controllers/NotasController.cs
 using Microsoft.AspNetCore.Mvc;
-using ProyectoP2.Models;
+using Microsoft.EntityFrameworkCore;
+using NotasAcademicasApi.Data;
+using NotasAcademicasApi.Models;
+
+namespace NotasAcademicasApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
 public class NotasController : ControllerBase
 {
-    private static readonly List<NotaAcademica> notas = new()
-    {
-        new NotaAcademica { Id = 1, EstudianteId = 1, Materia = "Matemáticas", Nota = 9.5 },
-        new NotaAcademica { Id = 2, EstudianteId = 2, Materia = "Historia", Nota = 8.0 }
-    };
+    private readonly AppDbContext _context;
+    public NotasController(AppDbContext context) => _context = context;
 
     [HttpGet]
-    public ActionResult<IEnumerable<NotaAcademica>> Get() => notas;
+    public async Task<IActionResult> Get() => Ok(await _context.Notas.ToListAsync());
+
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] NotaAcademica nota)
+    {
+        _context.Notas.Add(nota);
+        await _context.SaveChangesAsync();
+        return Ok(nota);
+    }
 }
